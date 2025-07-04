@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subjects | GSmarts</title>
+  <link rel="stylesheet" href="styles/styles.css" />
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">GSmarts</div>
+      <span class="menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">&#9776;</span>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="subjects.html" class="active">Subjects / Grades</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <h1>Subjects & Grades</h1>
+    <p>Browse resources by subject and grade level</p>
+  </section>
+
+  <section class="subjects-grid" id="subjects-grid">
+    <!-- Dynamic subject cards will be inserted here -->
+  </section>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 GSmarts. All rights reserved.</p>
+      <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms & Conditions</a>
+    </div>
+  </footer>
+
+  <!-- ✅ Supabase JS Client -->
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabaseUrl = "https://azjdzjeehieycnlxrmsq.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amR6amVlaGlleWNubHhybXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTcwODAsImV4cCI6MjA2NzEzMzA4MH0.49gTNEucoawL0eHgIuYrqxGaIrUoqDglp7hoW4Hf4Ak";
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const grid = document.getElementById("subjects-grid");
+
+    async function loadSubjects() {
+      const { data, error } = await supabase
+        .from("resources")
+        .select("grade, subject");
+
+      if (error) {
+        console.error("Failed to fetch resources:", error.message);
+        grid.innerHTML = `<p>⚠️ Failed to load resources. Please try again later.</p>`;
+        return;
+      }
+
+      const groups = {};
+
+      data.forEach(({ grade, subject }) => {
+        if (!groups[grade]) groups[grade] = new Set();
+        groups[grade].add(subject);
+      });
+
+      Object.entries(groups).forEach(([grade, subjects]) => {
+        const card = document.createElement("div");
+        card.className = "subject-card";
+        card.innerHTML = `
+          <h3>${grade}</h3>
+          <ul>
+            ${[...subjects]
+              .map(
+                (s) =>
+                  `<li><a href="shop.html?grade=${encodeURIComponent(
+                    grade
+                  )}&subject=${encodeURIComponent(s)}">${s}</a></li>`
+              )
+              .join("")}
+          </ul>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    loadSubjects();
+  </script>
+</body>
+</html>
