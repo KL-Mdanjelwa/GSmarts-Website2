@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resources | GSmarts</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">GSmarts</div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="subjects.html">Subjects</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <h1 id="page-title">Resources</h1>
+    <p id="page-description"></p>
+  </section>
+
+  <section class="resource-grid" id="resource-grid">
+    <!-- Cards will be inserted here -->
+  </section>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 GSmarts. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ✅ Supabase Client + Script -->
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabaseUrl = "https://azjdzjeehieycnlxrmsq.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amR6amVlaGlleWNubHhybXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTcwODAsImV4cCI6MjA2NzEzMzA4MH0.49gTNEucoawL0eHgIuYrqxGaIrUoqDglp7hoW4Hf4Ak";
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const grid = document.getElementById("resource-grid");
+    const title = document.getElementById("page-title");
+    const desc = document.getElementById("page-description");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const grade = urlParams.get("grade");
+    const subject = urlParams.get("subject");
+
+    title.textContent = `${subject || 'All Subjects'} - ${grade || 'All Grades'}`;
+    desc.textContent = `Showing resources for ${subject} in ${grade}`;
+
+    async function loadResources() {
+      const { data, error } = await supabase
+        .from("resources")
+        .select("*")
+        .eq("grade", grade)
+        .eq("subject", subject);
+
+      if (error) {
+        grid.innerHTML = `<p>Error loading resources: ${error.message}</p>`;
+        return;
+      }
+
+      if (data.length === 0) {
+        grid.innerHTML = `<p>No resources found for ${subject} in ${grade}.</p>`;
+        return;
+      }
+
+      data.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "resource-card";
+        card.innerHTML = `
+          <img src="${item.image_url}" alt="Preview of ${item.title}" />
+          <h3>${item.title}</h3>
+          <p>Grade: ${item.grade}</p>
+          <p>Subject: ${item.subject}</p>
+          <p>Price: R${item.price.toFixed(2)}</p>
+          <a href="${item.file_url}" target="_blank" class="btn">Download</a>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    loadResources();
+  </script>
+</body>
+</html>

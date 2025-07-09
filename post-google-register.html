@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome | GSmarts</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <section class="contact-form">
+    <h2>Setting up your profile...</h2>
+    <div id="status">Please wait...</div>
+  </section>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabaseUrl = "https://azjdzjeehieycnlxrmsq.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amR6amVlaGlleWNubHhybXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTcwODAsImV4cCI6MjA2NzEzMzA4MH0.49gTNEucoawL0eHgIuYrqxGaIrUoqDglp7hoW4Hf4Ak";
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const status = document.getElementById("status");
+
+    async function setupProfile() {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        status.textContent = "Failed to retrieve user: " + (userError?.message || "No user found");
+        return;
+      }
+
+      const userId = user.id;
+      const email = user.email;
+
+      // Check if profile already exists
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
+        .single();
+
+      if (fetchError && fetchError.code !== "PGRST116") {
+        status.textContent = "Error checking profile: " + fetchError.message;
+        return;
+      }
+
+      if (!existingProfile) {
+        // Insert new profile with default role
+        const { error: insertError } = await supabase.from("profiles").insert([{
+          id: userId,
+          email,
+          role: "user"
+        }]);
+
+        if (insertError) {
+          status.textContent = "Failed to insert profile: " + insertError.message;
+          return;
+        }
+      }
+
+      // Redirect based on role
+      const { data: profileData, error: roleFetchError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+      if (roleFetchError) {
+        status.textContent = "Failed to fetch user role: " + roleFetchError.message;
+        return;
+      }
+
+      const role = profileData.role;
+
+      if (role === "admin") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    }
+
+    setupProfile();
+  </script>
+</body>
+</html>

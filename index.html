@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GSmarts | Home</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #3a86ff;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-links li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links li a:hover {
+      color: #ffcc00;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #3a86ff, #4cc9f0);
+      color: white;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      background-color: #ffcc00;
+      color: #333;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #ffc107;
+    }
+
+    /* Highlights Section */
+    .highlights {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      padding: 3rem 2rem;
+      background-color: #f8f9fa;
+    }
+
+    .highlight {
+      flex: 1 1 280px;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    .highlight h3 {
+      color: #3a86ff;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Download Section */
+    .downloads {
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .downloads h2 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .download-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
+    }
+
+    .download-item {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s;
+    }
+
+    .download-item:hover {
+      transform: translateY(-5px);
+    }
+
+    .download-item h4 {
+      color: #3a86ff;
+    }
+
+    /* Footer */
+    footer {
+      background: #3a86ff;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    footer a {
+      color: #ffcc00;
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background: #3a86ff;
+      }
+
+      .nav-links.open {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">GSmarts</div>
+      <span class="menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">&#9776;</span>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="subjects.html">Subjects / Grades</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="admin.html">Admin Panel</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Welcome to GSmarts</h1>
+      <p>Your gateway to quality South African educational resources.</p>
+      <a href="subjects.html" class="btn">Browse Resources</a>
+    </div>
+  </section>
+
+  <!-- Highlights Section -->
+  <section class="highlights">
+    <div class="highlight">
+      <h3>📘 Curriculum-Aligned</h3>
+      <p>All materials tailored to CAPS & South African learning outcomes.</p>
+    </div>
+    <div class="highlight">
+      <h3>💻 Easy Access</h3>
+      <p>Download resources instantly with or without payment.</p>
+    </div>
+    <div class="highlight">
+      <h3>🤝 Community-Focused</h3>
+      <p>Built for teachers, learners, and parents nationwide.</p>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section class="downloads">
+    <h2>📥 Featured Downloads</h2>
+    <div class="download-list">
+      <div class="download-item">
+        <h4>Grade 9 Maths Term 3 Pack</h4>
+        <p>Includes worksheets, memos, and revision activities.</p>
+        <a href="subjects.html" class="btn">Download</a>
+      </div>
+      <div class="download-item">
+        <h4>Grade 7 Natural Sciences Posters</h4>
+        <p>Beautifully illustrated A3 science posters for classroom or study use.</p>
+        <a href="subjects.html" class="btn">Download</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 GSmarts. All rights reserved.</p>
+      <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms & Conditions</a>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel | GSmarts</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">GSmarts</div>
+      <span class="menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">&#9776;</span>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="subjects.html">Subjects / Grades</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="admin.html">Admin Panel</a></li>
+      </ul>
+    </nav>
+  </header>
+  <section class="contact-form">
+    <h2>Admin: Upload New Resource</h2>
+    <form id="upload-form">
+      <label for="title">Title:</label>
+      <input type="text" id="title" required />
+
+      <label for="grade">Grade:</label>
+      <select id="grade" required>
+        <option value="Grade 7">Grade 7</option>
+        <option value="Grade 8">Grade 8</option>
+        <option value="Grade 9">Grade 9</option>
+      </select>
+
+      <label for="subject">Subject:</label>
+      <select id="subject" required>
+        <option value="Math">Math</option>
+        <option value="EMS">EMS</option>
+        <option value="English">English</option>
+        <option value="NST">NST</option>
+      </select>
+
+      <label for="price">Price (ZAR):</label>
+      <input type="number" id="price" min="0" step="0.01" required />
+
+      <label for="image">Image Preview:</label>
+      <input type="file" id="image" accept="image/*" />
+
+      <label for="file">PDF Resource File:</label>
+      <input type="file" id="file" accept="application/pdf" required />
+
+      <button type="submit" class="btn">Upload Resource</button>
+    </form>
+    <div id="upload-status"></div>
+  </section>
+
+  <!-- ✅ Supabase JS via ES module -->
+  <script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  const supabaseUrl = "https://azjdzjeehieycnlxrmsq.supabase.co";
+  const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amR6amVlaGlleWNubHhybXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTcwODAsImV4cCI6MjA2NzEzMzA4MH0.49gTNEucoawL0eHgIuYrqxGaIrUoqDglp7hoW4Hf4Ak";
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const status = document.getElementById("upload-status");
+
+  const DEFAULT_IMAGE_URL = "https://azjdzjeehieycnlxrmsq.supabase.co/storage/v1/object/public/default-data//631.jpg";
+
+  function sanitizeFilename(name) {
+    return name
+      .replace(/\s+/g, '_')
+      .replace(/[:]/g, '-')
+      .replace(/[^\w\-\.]/g, '');
+  }
+
+  document.getElementById("upload-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("title").value.trim();
+    const grade = document.getElementById("grade").value;
+    const subject = document.getElementById("subject").value.trim();
+    const price = parseFloat(document.getElementById("price").value);
+    const image = document.getElementById("image").files[0];
+    const file = document.getElementById("file").files[0];
+
+    if (!file) {
+      status.textContent = "❌ Please select a PDF resource file.";
+      return;
+    }
+
+    status.textContent = "📤 Uploading...";
+
+    try {
+      let imageURL = DEFAULT_IMAGE_URL;
+
+      if (image) {
+        const timestamp = Date.now();
+        const imagePath = `images/${timestamp}_${sanitizeFilename(image.name)}`;
+        const { error: imageError } = await supabase.storage
+          .from("resources")
+          .upload(imagePath, image, { contentType: image.type });
+        if (imageError) throw imageError;
+
+        imageURL = supabase.storage.from("resources").getPublicUrl(imagePath).data.publicUrl;
+      }
+
+      const timestamp = Date.now();
+      const filePath = `resources/${timestamp}_${sanitizeFilename(file.name)}`;
+      const { error: fileError } = await supabase.storage
+        .from("resources")
+        .upload(filePath, file, { contentType: file.type });
+      if (fileError) throw fileError;
+
+      const fileURL = supabase.storage.from("resources").getPublicUrl(filePath).data.publicUrl;
+
+      const { error: insertError } = await supabase.from("resources").insert([
+        {
+          title,
+          grade,
+          subject,
+          price,
+          image_url: imageURL,
+          file_url: fileURL,
+          uploaded_at: new Date().toISOString()
+        }
+      ]);
+      if (insertError) throw insertError;
+
+      status.textContent = "✅ Upload successful!";
+      document.getElementById("upload-form").reset();
+    } catch (err) {
+      console.error(err);
+      status.textContent = "❌ Upload failed: " + err.message;
+    }
+  });
+</script>
+</body>
+</html>

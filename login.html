@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login | GSmarts</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <section class="contact-form">
+    <h2>Login</h2>
+    <form id="login-form">
+      <label for="email">Email:</label>
+      <input type="email" id="email" required />
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" required />
+
+      <label><input type="checkbox" id="rememberMe" /> Remember me</label>
+
+      <button type="submit" class="btn">Login</button>
+    </form>
+    <p>or</p>
+    <button id="googleLogin" class="btn">Sign in with Google</button>
+    <p>Don't have an account? <a href="register.html">Register here</a></p>
+    <div id="status"></div>
+  </section>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabaseUrl = "https://azjdzjeehieycnlxrmsq.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amR6amVlaGlleWNubHhybXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTcwODAsImV4cCI6MjA2NzEzMzA4MH0.49gTNEucoawL0eHgIuYrqxGaIrUoqDglp7hoW4Hf4Ak";
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const status = document.getElementById("status");
+
+    // ✅ Email/password login
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (loginError) {
+        status.textContent = "Login failed: " + loginError.message;
+        return;
+      }
+
+      const user = loginData.user;
+
+      // Fetch role
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        status.textContent = "Failed to fetch role: " + profileError.message;
+        return;
+      }
+
+      // Redirect based on role
+      if (profile.role === "admin") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    // ✅ Google login with post-login handler
+    document.getElementById("googleLogin").addEventListener("click", async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/post-google-register.html"
+        }
+      });
+
+      if (error) {
+        status.textContent = "Google login failed: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>

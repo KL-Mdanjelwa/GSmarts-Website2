@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register | GSmarts</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <section class="contact-form">
+    <h2>Register</h2>
+    <form id="register-form">
+      <label for="email">Email:</label>
+      <input type="email" id="email" required />
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" required />
+
+      <button type="submit" class="btn">Register</button>
+    </form>
+    <p>or</p>
+    <button id="googleSignup" class="btn">Sign up with Google</button>
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+    <div id="status"></div>
+  </section>
+
+  <!-- ✅ Supabase Auth via ES module -->
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabaseUrl = "https://azjdzjeehieycnlxrmsq.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amR6amVlaGlleWNubHhybXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTcwODAsImV4cCI6MjA2NzEzMzA4MH0.49gTNEucoawL0eHgIuYrqxGaIrUoqDglp7hoW4Hf4Ak";
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const form = document.getElementById("register-form");
+    const status = document.getElementById("status");
+
+    // ✅ Email/password registration + profile role insert
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      const { data, error } = await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        status.textContent = "Registration failed: " + error.message;
+        return;
+      }
+
+      const user = data.user;
+      if (!user) {
+        status.textContent = "Please check your email to confirm registration.";
+        return;
+      }
+
+      // Insert default profile with 'user' role
+      const { error: profileError } = await supabase.from("profiles").insert([{
+        id: user.id,
+        email: user.email,
+        role: "user"
+      }]);
+
+      if (profileError) {
+        status.textContent = "Registered, but profile setup failed: " + profileError.message;
+        return;
+      }
+
+      status.textContent = "Registration successful! You can now log in.";
+      form.reset();
+    });
+
+    // ✅ Google sign-up with redirect (you will handle profile setup after redirect)
+    document.getElementById("googleSignup").addEventListener("click", async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/post-google-register.html", // Handle profile insert there
+        },
+      });
+
+      if (error) {
+        alert("Google sign-up failed: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subjects | GSmarts</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f8fafc;
+      color: #333;
+    }
+
+    header {
+      background-color: #3a86ff;
+      color: white;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .nav-links a.active {
+      text-decoration: underline;
+    }
+
+    .page-header {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 1rem auto;
+      max-width: 90%;
+    }
+
+    .tab-button {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      background-color: #e0e7ff;
+      color: #1e40af;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .tab-button.active,
+    .tab-button:hover {
+      background-color: #3a86ff;
+      color: #fff;
+    }
+
+    .search-bar {
+      text-align: center;
+      margin: 1rem;
+    }
+
+    .search-bar input {
+      padding: 0.6rem 1rem;
+      width: 300px;
+      max-width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 20px;
+      padding: 2rem;
+    }
+
+    .subject-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .subject-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .subject-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .subject-card a {
+      display: inline-block;
+      margin-top: 0.5rem;
+      text-decoration: none;
+      color: #3a86ff;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    .subject-card a:hover {
+      color: #1d4ed8;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #f1f5f9;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 2rem;
+    }
+
+    footer a {
+      color: #3a86ff;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        flex-direction: column;
+        width: 100%;
+        padding-top: 0.5rem;
+      }
+
+      .nav-links.open {
+        display: block;
+      }
+
+      .menu-toggle {
+        display: inline-block;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">GSmarts</div>
+      <span class="menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">&#9776;</span>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="subjects.html" class="active">Subjects / Grades</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="page-header">
+    <h1>📚 Subjects & Grades</h1>
+    <p>Browse resources by subject and grade level</p>
+  </section>
+
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="🔍 Search subjects..." />
+  </div>
+
+  <div class="tabs" id="grade-tabs"></div>
+
+  <section class="subjects-grid" id="subjects-grid">
+    <!-- Cards load here -->
+  </section>
+
+  <footer>
+    <p>&copy; 2025 GSmarts. All rights reserved.
+      <br><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms & Conditions</a>
+    </p>
+  </footer>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const supabaseUrl = "https://azjdzjeehieycnlxrmsq.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amR6amVlaGlleWNubHhybXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTcwODAsImV4cCI6MjA2NzEzMzA4MH0.49gTNEucoawL0eHgIuYrqxGaIrUoqDglp7hoW4Hf4Ak";
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const grid = document.getElementById("subjects-grid");
+    const tabs = document.getElementById("grade-tabs");
+    const searchInput = document.getElementById("search");
+
+    const emojiMap = {
+      Math: "📐",
+      English: "📖",
+      Science: "🔬",
+      History: "🏛️",
+      Geography: "🗺️",
+      Life_Sciences: "🌱",
+      Economics: "💰",
+    };
+
+    let groupedData = {};
+
+    const getEmoji = (subject) =>
+      emojiMap[subject.replace(/\s+/g, "_")] || "📘";
+
+    function renderSubjects(grade, search = "") {
+      grid.innerHTML = "";
+      const subjects = groupedData[grade];
+      if (!subjects) return;
+
+      Object.entries(subjects).forEach(([subject, count]) => {
+        if (!subject.toLowerCase().includes(search.toLowerCase())) return;
+
+        const card = document.createElement("div");
+        card.className = "subject-card";
+        card.innerHTML = `
+          <h3>${getEmoji(subject)} ${subject}</h3>
+          <p>${count} resource${count > 1 ? "s" : ""}</p>
+          <a href="shop.html?grade=${encodeURIComponent(grade)}&subject=${encodeURIComponent(subject)}">View Resources</a>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function setActiveTab(grade) {
+      document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+      const btn = document.querySelector(`[data-grade="${grade}"]`);
+      if (btn) btn.classList.add("active");
+    }
+
+    async function loadSubjects() {
+      const { data, error } = await supabase.from("resources").select("grade, subject");
+
+      if (error) {
+        grid.innerHTML = `<p>⚠️ Failed to load resources.</p>`;
+        return;
+      }
+
+      data.forEach(({ grade, subject }) => {
+        if (!groupedData[grade]) groupedData[grade] = {};
+        if (!groupedData[grade][subject]) groupedData[grade][subject] = 0;
+        groupedData[grade][subject]++;
+      });
+
+      Object.keys(groupedData).forEach((grade, index) => {
+        const button = document.createElement("button");
+        button.textContent = grade;
+        button.className = "tab-button" + (index === 0 ? " active" : "");
+        button.dataset.grade = grade;
+        button.onclick = () => {
+          setActiveTab(grade);
+          renderSubjects(grade, searchInput.value);
+        };
+        tabs.appendChild(button);
+      });
+
+      const defaultGrade = Object.keys(groupedData)[0];
+      renderSubjects(defaultGrade);
+    }
+
+    searchInput.addEventListener("input", () => {
+      const active = document.querySelector(".tab-button.active");
+      if (active) renderSubjects(active.dataset.grade, searchInput.value);
+    });
+
+    loadSubjects();
+  </script>
+</body>
+</html>
